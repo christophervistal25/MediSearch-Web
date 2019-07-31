@@ -1,50 +1,82 @@
 <template>
-	<div class="p-5">
-		<Alert :status="status">
+<div>
+	<Nav>
+		<template v-slot:left-links>
+			<b-nav-item v-if="leftLinks" v-for="link in leftLinks">
+				<b-link :to="link.to">{{ link.text }}</b-link>
+			</b-nav-item>
+		</template>
+		<template v-slot:right-links>
+			<b-nav-item v-if="rightLinks" v-for="link in rightLinks">
+				<b-link :to="link.to">{{ link.text }}</b-link>
+			</b-nav-item>
+		</template>
+	</Nav>
+
+	<div class="container mt-5">
+		<Alert :status="status" v-show="!spinner">
 			<template v-slot:message>
-				{{ message }}
-			</template>			
+			{{ message }}
+			</template>
 		</Alert>
-		<form @submit.prevent="loginAUser">
-		  <div class="form-row">
-		    <div class="form-group col-md-6">
-		      <label for="inputEmail">Email</label>
-		      <input type="email" class="form-control" v-model="userLogin.email" id="inputEmail" placeholder="Email">
-		    </div>
-		    <div class="form-group col-md-6">
-		      <label for="inputPassword">Password</label>
-		      <input type="password" class="form-control" v-model="userLogin.password" id="inputPassword" placeholder="Password">
-		    </div>
-		  </div>
-		  <span class="text-primary"><router-link to="/register">Create an account?</router-link></span>
-		  <div class="clear-fix"></div>
-		  <div class="float-right">
-		  	<button type="submit" class="btn btn-primary">Sign in</button>
-		  </div>
-		</form>
+
+		<div class="text-center">
+			<Spinner v-show="spinner"></Spinner>
+		</div>
+
+		<b-form @submit.prevent="onSubmit">
+			<b-form-group id="input-group-1" label="Email address:" label-for="input-1" description="">
+				<b-form-input id="input-1" type="email" v-model="userLogin.email" required placeholder="Enter email" :disabled="spinner"></b-form-input>
+			</b-form-group>
+
+			<b-form-group id="input-group-2" label="Password:" label-for="input-2">
+				<b-form-input id="input-2" type="password" v-model="userLogin.password" required placeholder="Enter email" :disabled="spinner"></b-form-input>
+			</b-form-group>
+
+			<div class="text-right">
+			 	<b-button type="submit" variant="primary" :disabled="spinner" pill>Sign In</b-button>
+			</div>
+		</b-form>
 	</div>
+
+</div>
 </template>
 <script>
+
 import axios from 'axios'
 import Alert from '../components/Alert.vue'
+import Nav from '../components/Nav.vue'
+import Spinner from '../components/Spinner.vue'
+
 export default {
 	data() {
 		return {
-			userLogin  : {
-				email : null,
-				password : null,
-			},
-			status : 'info',
-			message : 'Welcome Back!',
+		leftLinks :[
+			{ to : '/', text : 'Home' },
+		],
+		rightLinks : [
+			{ to : '/register', text : 'Sign Up' },
+		],
+		userLogin  : {
+				email : 'testing@yahoo.com',
+				password : '123456',
+		},
+		status : 'info',
+		message : 'Welcome Back!',
+		spinner : false,
 		};
 	},
 	methods : {
-		loginAUser() {
+		onSubmit() {
+			this.spinner = true;
 			axios.post(`http://localhost:8000/owner/login`, this.userLogin)
 				.then((res) => {
 					this.status = 'success';
 					this.message = 'Redirecting...';
-					setTimeout((_) => this.$router.push('/home'), 2000);
+					setTimeout((_) =>  {
+						this.$router.push('/owner/dashboard');
+						this.spinner = false;
+					}, 2000);
 				})
 				.catch((err) => {
 					if ( err.response.status === 422 ) {
@@ -52,12 +84,16 @@ export default {
 							this.status = 'danger';
 						// Display the message
 							this.message = err.response.data.message;
+
+						this.spinner = false;
 					}
 				});
 		},
 	},
 	components : {
 		Alert,
+		Nav,
+		Spinner,
 	}
 }
 </script>

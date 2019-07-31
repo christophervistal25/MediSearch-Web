@@ -21,14 +21,18 @@ export default class FormValidator
 	examine(fieldWithRule) {
 		for( const field of Object.keys(fieldWithRule) ) {
 			for( const rule of this.rules[field].split('|') ) {
-				  if( this.isRuleHasArgument(rule) ) {
-				  	let [method, argument] = rule.split(':');
-				  		this[method](field, argument);
-				  } else {
-				  		this[rule](field);
-				  }
+				  this.ruleExecutor(rule, field);
 			}
 		}
+	}
+
+	ruleExecutor(rule, field) {
+		if( this.isRuleHasArgument(rule) ) {
+		  	let [method, argument] = rule.split(':');
+		  		this[method](field, argument);
+		  } else {
+		  		this[rule](field);
+		  }
 	}
 
 	fieldSeperator() {
@@ -47,46 +51,45 @@ export default class FormValidator
 		return rule.includes(':');
 	}
 
-
 	required(field) {
 		if ( !this.formFields[field] ) {
-			this.message.push({
-				[field] : `${field} field is required`,
-			});	
+			this.message.push(`${field} field is required`);	
 		}
 	}
 
 	min(field, ruleValue) {
 		if ( !(this.formFields[field] != null && this.formFields[field].length >= ruleValue) ) {
-			this.message.push({
-				[field] : `${field} must be minimum of ${ruleValue}`,
-			});		
+			this.message.push(`${field} must be minimum of ${ruleValue} characters`);		
 		}
 	}
 
 	max(field, ruleValue) {
 		if ( !(this.formFields[field] != null && this.formFields[field].length <= ruleValue) ) {
-			this.message.push({
-				[field] : `${field} must be maximum of ${ruleValue}`,
-			});		
+			this.message.push(`${field} must be maximum of ${ruleValue} characters`);		
 		}
 	}
 
 	match(field, ruleValue) {
 		if ( !(this.formFields[field] === this.formFields[ruleValue]) ) {
-			this.message.push({
-				[field] : `${field} must be match with ${ruleValue}`,
-			});		
+			this.message.push(`${field} must be match with ${ruleValue}`);		
 		}
 	}
 
 	strict(field) {
-		
+		// Implement strong password pattern here.
 	}
 
 	success(callback) {
 		if (this.message.length == 0) {
 			callback();
 		}
+		return this;
+	}
+
+	fail(callback) {
+		if (this.message.length != 0) {
+			callback();
+		}
+		return this;
 	}
 }

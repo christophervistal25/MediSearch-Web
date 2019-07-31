@@ -1,10 +1,13 @@
 <template>
-	<div :class="'alert alert-' + status | lowercase"  role="alert">
-		<slot name="message"></slot>
+	<div>
+		<b-alert show :variant="status | lowercase">
+	    	<slot name="message"></slot>
+	    </b-alert>
 	</div>
 </template>
 <script>
-import axios from 'axios'
+
+
 export default {
 	props : {
 		status : String,
