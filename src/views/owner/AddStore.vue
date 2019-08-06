@@ -62,7 +62,7 @@ import Alert from '../../components/Alert.vue'
 					.then((res) => {
 						const response = res.data;
 						if ( response.created ) {
-							this.message          = 'Successfully register.';
+							this.message          = 'Succesfully add your store.';
 							this.status           = 'success';
 							this.store.name       = '';
 							this.store.located_at = '';
